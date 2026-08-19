@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="custom-breadcrumb mb-2">
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> &gt; <span>Lab Management</span>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold text-dark mb-0"><i class="fa-solid fa-flask me-2" style="color:#7c3aed;"></i>Laboratory Management</h3>
+    <button class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#requestLabModal">
+        <i class="fa-solid fa-plus me-1"></i> Request Lab Test
+    </button>
+</div>
+
+<div class="card-custom shadow-sm p-4">
+    <h5 class="fw-bold text-primary mb-3">All Laboratory Test Reports</h5>
+    <div class="table-responsive">
+        <table class="table table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Test Date</th>
+                    <th>Patient Name</th>
+                    <th>Test Name</th>
+                    <th>Result Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reports %}
+                <tr>
+                    <td>LAB{{ "%03d"|format(r.id) }}</td>
+                    <td>{{ r.test_date }}</td>
+                    <td class="fw-bold text-primary">{{ r.patient.full_name if r.patient else 'Patient' }}</td>
+                    <td class="fw-semibold text-dark">{{ r.test_name }}</td>
+                    <td>
+                        {% if r.result == 'Normal' %}
+                        <span class="badge bg-success">Normal</span>
+                        {% elif r.result == 'Borderline' %}
+                        <span class="badge bg-warning text-dark">Borderline</span>
+                        {% elif r.result == 'Critical' %}
+                        <span class="badge bg-danger">Critical</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="viewLabModal('{{ r.test_name }}', '{{ r.patient.full_name if r.patient else "Patient" }}', '{{ r.test_date }}', '{{ r.result }}', '{{ r.report_file }}')">
+                                <i class="fa-solid fa-eye me-1"></i> View
+                            </button>
+                            {% if current_user.role in ['Admin', 'Laboratory Staff'] %}
+                            <button class="btn btn-outline-secondary" onclick="openUpdateResultModal({{ r.id }}, '{{ r.test_name }}', '{{ r.result }}')">
+                                <i class="fa-solid fa-pen me-1"></i> Update
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted">No lab reports registered.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal 1: Request Lab Test -->
+<div class="modal fade" id="requestLabModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-primary"><i class="fa-solid fa-flask me-2"></i>Request Laboratory Test</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('api_request_lab_test') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Patient *</label>
+                        <select name="patient_id" class="form-select" required>
+                            {% for p in patients %}
+                            <option value="{{ p.id }}">{{ p.full_name }} ({{ p.patient_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Test Name / Panel *</label>
+                        <input type="text" name="test_name" class="form-control" placeholder="e.g. Complete Blood Count (CBC), Lipid Profile" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Test Date *</label>
+                        <input type="date" name="test_date" class="form-control" value="{{ system_time_str[:11] }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit Lab Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Update Lab Result -->
+<div class="modal fade" id="updateResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-dark"><i class="fa-solid fa-flask-vial me-2"></i>Update Lab Test Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateResultForm" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Test Name</label>
+                        <input type="text" id="updateTestName" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Result Status *</label>
+                        <select id="updateResultStatus" name="result" class="form-select" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Borderline">Borderline</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-semibold py-2">
+                        <i class="fa-solid fa-check me-1"></i> Save Lab Result
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: View Lab Report Document -->
+<div class="modal fade" id="viewReportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-medical me-2"></i>Laboratory Report Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="viewReportBody">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openUpdateResultModal(reportId, testName, currentStatus) {
+        document.getElementById('updateTestName').value = testName;
+        document.getElementById('updateResultStatus').value = currentStatus;
+        document.getElementById('updateResultForm').action = `/lab/update-result/${reportId}`;
+        new bootstrap.Modal(document.getElementById('updateResultModal')).show();
+    }
+
+    function viewLabModal(testName, patientName, testDate, result, reportFile) {
+        const body = document.getElementById('viewReportBody');
+        let statusBadge = '<span class="badge bg-secondary">Pending</span>';
+        if (result === 'Normal') statusBadge = '<span class="badge bg-success">Normal</span>';
+        if (result === 'Borderline') statusBadge = '<span class="badge bg-warning text-dark">Borderline</span>';
+        if (result === 'Critical') statusBadge = '<span class="badge bg-danger">Critical</span>';
+
+        body.innerHTML = `
+            <div class="text-center border-bottom pb-3 mb-3">
+                <h4 class="fw-bold text-primary mb-1">INTEGRATED PATIENT CARE DIAGNOSTICS</h4>
+                <div class="text-muted small">Clinical Pathology & Diagnostic Laboratory Division</div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-6"><strong>Patient Name:</strong> ${patientName}</div>
+                <div class="col-6"><strong>Test Date:</strong> ${testDate}</div>
+                <div class="col-6"><strong>Test Name:</strong> ${testName}</div>
+                <div class="col-6"><strong>Result Status:</strong> ${statusBadge}</div>
+            </div>
+            <div class="alert alert-light border p-3">
+                <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-clipboard-list me-2"></i>Diagnostic Observations</h6>
+                <p class="mb-0 text-secondary small">Test specimen analyzed according to standard clinical laboratory protocol. Reference ranges and automated verification completed.</p>
+            </div>
+            <div class="text-end small text-muted">Document Reference: ${reportFile}</div>
+        `;
+        new bootstrap.Modal(document.getElementById('viewReportModal')).show();
+    }
+</script>
+{% endblock %}

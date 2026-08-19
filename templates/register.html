@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block login_content %}
+<div class="container py-5">
+    <div class="row justify-content-center"><div class="col-md-5">
+        <div class="card p-4 shadow-sm border-0">
+            <h4 class="fw-bold text-dark mb-3">System Access Registration</h4>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Full Name</label>
+                    {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else "")) }}
+                    {% for error in form.full_name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Email Address</label>
+                    {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                    {% for error in form.email.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Phone Number</label>
+                    {{ form.phone_number(class="form-control" + (" is-invalid" if form.phone_number.errors else "")) }}
+                    {% for error in form.phone_number.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Account Password</label>
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                    {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Assigned Role Context</label>
+                    {{ form.role(class="form-select" + (" is-invalid" if form.role.errors else "")) }}
+                    {% for error in form.role.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2">Register User Account</button>
+            </form>
+            <a href="{{ url_for('home') }}" class="d-block text-center mt-3 text-secondary small">Already have an account? Login</a>
+        </div>
+    </div></div>
+</div>
+{% endblock %}

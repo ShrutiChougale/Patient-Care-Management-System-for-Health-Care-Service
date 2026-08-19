@@ -1,0 +1,78 @@
+{
+  "info": {
+    "name": "Integrated Patient Care Management API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Patients",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/patients"
+      }
+    },
+    {
+      "name": "Get Doctors",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/doctors"
+      }
+    },
+    {
+      "name": "Get Consultations",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/consultations"
+      }
+    },
+    {
+      "name": "Get Appointments",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/appointments"
+      }
+    },
+    {
+      "name": "Get Prescriptions",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/prescriptions"
+      }
+    },
+    {
+      "name": "Get Laboratory",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/laboratory"
+      }
+    },
+    {
+      "name": "Get Pharmacy Inventory",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/pharmacy"
+      }
+    },
+    {
+      "name": "Get Billing Invoices",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/billing"
+      }
+    },
+    {
+      "name": "Get Notifications",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/notifications"
+      }
+    },
+    {
+      "name": "Get Support Tickets",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:5000/api/v1/support"
+      }
+    }
+  ]
+}

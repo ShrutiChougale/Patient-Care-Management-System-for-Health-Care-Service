@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header Title & Action -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="fa-solid fa-bell text-primary me-2"></i>Notification Center</h3>
+            <p class="text-muted mb-0">Track system alerts, appointment reminders, prescription updates, lab report readiness, and hospital announcements.</p>
+        </div>
+        {% if current_user.role == 'Admin' %}
+        <button type="button" class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createNotifModal">
+            <i class="fa-solid fa-bullhorn me-2"></i>Send Announcement
+        </button>
+        {% endif %}
+    </div> 
+
+    <!-- Notification Cards & Filter Tabs -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+            <ul class="nav nav-pills card-header-pills" id="notifFilterTab">
+                <li class="nav-item">
+                    <button class="nav-link active fw-bold" onclick="filterNotifs('all')">All Notifications</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" onclick="filterNotifs('unread')">Unread <span class="badge bg-danger ms-1">{{ notifications|selectattr('status', 'equalto', 'unread')|list|length }}</span></button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" onclick="filterNotifs('read')">Read</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" onclick="filterNotifs('delivered')">Delivered</button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush" id="notifList">
+                {% if notifications %}
+                    {% for n in notifications %}
+                    <div class="list-group-item p-3 notif-item status-{{ n.status }}" data-status="{{ n.status }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex gap-3">
+                                <div class="notif-icon bg-light rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 45px; height: 45px;">
+                                    {% if n.notification_type == 'Appointment Reminder' %}
+                                    <i class="fa-solid fa-calendar-check fs-5"></i>
+                                    {% elif n.notification_type == 'Prescription Ready' %}
+                                    <i class="fa-solid fa-prescription fs-5 text-success"></i>
+                                    {% elif n.notification_type == 'Lab Report Ready' %}
+                                    <i class="fa-solid fa-flask fs-5 text-warning"></i>
+                                    {% elif n.notification_type == 'Billing Reminder' %}
+                                    <i class="fa-solid fa-file-invoice-dollar fs-5 text-info"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-bullhorn fs-5 text-danger"></i>
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="fw-bold mb-0 text-dark">{{ n.title }}</h6>
+                                        <span class="badge bg-secondary style-badge">{{ n.notification_type }}</span>
+                                        {% if n.status == 'unread' %}
+                                        <span class="badge bg-danger">Unread</span>
+                                        {% elif n.status == 'read' %}
+                                        <span class="badge bg-primary">Read</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Delivered</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="mb-1 text-muted mt-1">{{ n.message }}</p>
+                                    <div class="small text-muted">
+                                        <i class="fa-regular fa-clock me-1"></i> {{ n.date.strftime('%d %b %Y, %I:%M %p') }} | Target Recipient: <span class="badge bg-light text-dark border">{{ n.recipient_role }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Change Status
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{{ url_for('mark_notification_read', notif_id=n.id) }}"><i class="fa-solid fa-check text-primary me-2"></i>Mark Read</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('mark_notification_unread', notif_id=n.id) }}"><i class="fa-solid fa-envelope text-danger me-2"></i>Mark Unread</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('mark_notification_delivered', notif_id=n.id) }}"><i class="fa-solid fa-paper-plane text-success me-2"></i>Mark Delivered</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fa-solid fa-bell-slash fs-1 d-block mb-2"></i>
+                        No notifications found.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Broadcast Notification Modal -->
+<div class="modal fade" id="createNotifModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="broadcastNotifForm" onsubmit="sendBroadcastNotification(event)">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-bullhorn me-2"></i>Send Broadcast Notification</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Hospital Maintenance Notice" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notification Type</label>
+                        <select name="notification_type" class="form-select">
+                            <option value="Appointment Reminder">Appointment Reminder</option>
+                            <option value="Prescription Ready">Prescription Ready</option>
+                            <option value="Lab Report Ready">Lab Report Ready</option>
+                            <option value="Billing Reminder">Billing Reminder</option>
+                            <option value="Hospital Announcement" selected>Hospital Announcement</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Recipient Group</label>
+                        <select name="recipient_role" class="form-select">
+                            <option value="all">All Users</option>
+                            <option value="Patient">Patients Only</option>
+                            <option value="Doctor">Doctors Only</option>
+                            <option value="Nurse">Nurses Only</option>
+                            <option value="Pharmacist">Pharmacists Only</option>
+                            <option value="Laboratory Staff">Lab Staff Only</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message</label>
+                        <textarea name="message" class="form-control" rows="3" placeholder="Write notification message..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Broadcast Notification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterNotifs(status) {
+        document.querySelectorAll('#notifFilterTab button').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const items = document.querySelectorAll('.notif-item');
+        items.forEach(item => {
+            if (status === 'all' || item.dataset.status === status) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function sendBroadcastNotification(event) {
+        event.preventDefault();
+        const form = document.getElementById('broadcastNotifForm');
+        const title = form.querySelector('[name=title]').value.trim();
+        const message = form.querySelector('[name=message]').value.trim();
+        const notifType = form.querySelector('[name=notification_type]').value;
+        const recipientRole = form.querySelector('[name=recipient_role]').value;
+
+        if (!title || !message) return;
+
+        const btn = form.querySelector('[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Sending...';
+
+        fetch('/api/notifications/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, message, notification_type: notifType, recipient_role: recipientRole })
+        })
+        .then(r => r.json())
+        .then(data => {
+            bootstrap.Modal.getInstance(document.getElementById('createNotifModal')).hide();
+            form.reset();
+            // Show success toast
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success shadow position-fixed bottom-0 end-0 m-4 fw-semibold';
+            toast.style.zIndex = 9999;
+            toast.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i>Notification broadcast sent successfully!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => location.reload(), 1200);
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = 'Broadcast Notification';
+            alert('Failed to send notification. Please try again.');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block login_content %}
+<div class="container py-5 text-center">
+    <h1 class="fw-bold text-primary mb-5 mt-4"><i class="fa-solid fa-hospital-user me-2"></i>Integrated Patient Care Management System</h1>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-3">
+            <div class="card p-4 portal-card border-top border-primary border-4 h-100">
+                <i class="fa-solid fa-shield-halved text-primary fs-1 mb-3"></i>
+                <h5>Admin Hub</h5>
+                <a href="{{ url_for('login_admin') }}" class="btn btn-primary mt-auto">Open Login</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 portal-card border-top border-success border-4 h-100">
+                <i class="fa-solid fa-stethoscope text-success fs-1 mb-3"></i>
+                <h5>Doctor Hub</h5>
+                <a href="{{ url_for('login_doctor') }}" class="btn btn-success mt-auto">Open Login</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 portal-card border-top border-warning border-4 h-100">
+                <i class="fa-solid fa-user-nurse text-warning fs-1 mb-3"></i>
+                <h5>Nurse Hub</h5>
+                <a href="{{ url_for('login_nurse') }}" class="btn btn-warning text-white mt-auto">Open Login</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-4 portal-card border-top border-danger border-4 h-100">
+                <i class="fa-solid fa-bed-pulse text-danger fs-1 mb-3"></i>
+                <h5>Patient Hub</h5>
+                <a href="{{ url_for('login_patient') }}" class="btn btn-danger mt-auto">Open Login</a>
+            </div>
+        </div>
+    </div>
+    <p class="mt-5 text-muted">New staff member? <a href="{{ url_for('register') }}" class="text-primary fw-bold">Register system identity here</a></p>
+</div>
+{% endblock %}

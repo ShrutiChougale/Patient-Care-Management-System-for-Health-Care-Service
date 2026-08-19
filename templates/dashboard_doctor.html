@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+    <h4 class="fw-bold text-success">Doctor Dashboard</h4>
+    <p class="text-muted">Welcome, {{ current_user.full_name }}</p>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white fw-bold">
+                <i class="fa-solid fa-user-md me-2"></i>My Profile
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width: 150px;">Name:</th><td>{{ current_user.full_name }}</td></tr>
+                    <tr><th>Email:</th><td>{{ current_user.email }}</td></tr>
+                    <tr><th>Phone:</th><td>{{ current_user.phone_number }}</td></tr>
+                    <tr><th>Role:</th><td>{{ current_user.role }}</td></tr>
+                </table>
+                <button class="btn btn-outline-success mt-3">Update Profile</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="fa-solid fa-calendar-check me-2"></i>Today's Appointments
+            </div>
+            <div class="card-body p-3 text-center">
+                {% if today_appointments %}
+                    <div class="table-responsive">
+                        <table class="table align-middle text-start mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in today_appointments %}
+                                <tr>
+                                    <td class="fw-semibold">{{ appt.patient.full_name }}</td>
+                                    <td>{{ appt.appointment_date.strftime('%d %b %Y') if appt.appointment_date else '' }}</td>
+                                    <td>{{ appt.appointment_time.strftime('%I:%M %p') if appt.appointment_time else '' }}</td>
+                                    <td><span class="badge bg-primary px-2 py-1">{{ appt.status }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="py-4">
+                        <i class="fa-solid fa-bed-empty fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                        <h5 class="text-secondary">No appointments scheduled for today</h5>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

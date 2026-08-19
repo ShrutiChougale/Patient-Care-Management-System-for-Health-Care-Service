@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block login_content %}
+<div class="container py-5">
+    <div class="text-center mb-5 mt-4">
+        <h2 class="fw-bold text-dark">Integrated Patient Care Management System</h2>
+        <p class="text-muted">Please Login to Continue</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-4 justify-content-center">
+        <!-- Admin Login Card -->
+        <div class="col-md-3">
+            <div class="card h-100 border-primary rounded shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4 text-primary">
+                        <i class="fa-solid fa-shield-halved fs-1 mb-2"></i>
+                        <h5 class="fw-bold mb-0">Admin Login</h5>
+                        <small class="text-muted">System Administrator</small>
+                    </div>
+                    <hr>
+                    <form method="POST" action="{{ url_for('home') }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="role" value="Admin">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter admin email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-custom admin w-100 mb-4"><i class="fa-solid fa-lock me-2"></i>Login as Admin</button>
+                    </form>
+                    
+                    <div class="text-center text-muted" style="font-size: 0.8rem;">
+                        Don't have an account? <a href="{{ url_for('register', role='Admin') }}" class="text-primary text-decoration-none">Register Here</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top border-primary border-2 p-3 text-secondary" style="font-size: 0.8rem;">
+                    <div class="d-flex align-items-start">
+                        <i class="fa-solid fa-shield text-primary me-2 mt-1"></i>
+                        <div><strong class="text-primary d-block">Admin Access</strong>Manage system settings, users, doctors, nurses and patient records.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Login Card -->
+        <div class="col-md-3">
+            <div class="card h-100 border-success rounded shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-4 text-success">
+                        <i class="fa-solid fa-stethoscope fs-1 mb-2"></i>
+                        <h5 class="fw-bold mb-0">Doctor Login</h5>
+                        <small class="text-muted">Medical Practitioner</small>
+                    </div>
+                    <hr>
+                    <form method="POST" action="{{ url_for('home') }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="role" value="Doctor">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter doctor email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-custom doctor w-100 mb-4"><i class="fa-solid fa-lock me-2"></i>Login as Doctor</button>
+                    </form>
+                    
+                    <div class="text-center text-muted" style="font-size: 0.8rem;">
+                        Don't have an account? <a href="{{ url_for('register', role='Doctor') }}" class="text-success text-decoration-none">Register Here</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top border-success border-2 p-3 text-secondary" style="font-size: 0.8rem;">
+                    <div class="d-flex align-items-start">
+                        <i class="fa-solid fa-stethoscope text-success me-2 mt-1"></i>
+                        <div><strong class="text-success d-block">Doctor Access</strong>View appointments, patient records, diagnosis, prescriptions and reports.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nurse Login Card -->
+        <div class="col-md-3">
+            <div class="card h-100 rounded shadow-sm" style="border-color: #6f42c1;">
+                <div class="card-body">
+                    <div class="text-center mb-4" style="color: #6f42c1;">
+                        <i class="fa-solid fa-user-nurse fs-1 mb-2"></i>
+                        <h5 class="fw-bold mb-0">Nurse Login</h5>
+                        <small class="text-muted">Nursing Staff</small>
+                    </div>
+                    <hr>
+                    <form method="POST" action="{{ url_for('home') }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="role" value="Nurse">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter nurse email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-custom nurse w-100 mb-4"><i class="fa-solid fa-lock me-2"></i>Login as Nurse</button>
+                    </form>
+                    
+                    <div class="text-center text-muted" style="font-size: 0.8rem;">
+                        Don't have an account? <a href="{{ url_for('register', role='Nurse') }}" class="text-decoration-none" style="color: #6f42c1;">Register Here</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top border-2 p-3 text-secondary" style="border-color: #6f42c1 !important; font-size: 0.8rem;">
+                    <div class="d-flex align-items-start">
+                        <i class="fa-solid fa-bed-pulse me-2 mt-1" style="color: #6f42c1;"></i>
+                        <div><strong class="d-block" style="color: #6f42c1;">Nurse Access</strong>View patient information, update vitals, manage medications and assist doctors.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Login Card -->
+        <div class="col-md-3">
+            <div class="card h-100 border-warning rounded shadow-sm" style="border-color: #fd7e14 !important;">
+                <div class="card-body">
+                    <div class="text-center mb-4" style="color: #fd7e14;">
+                        <i class="fa-solid fa-user fs-1 mb-2"></i>
+                        <h5 class="fw-bold mb-0">Patient Login</h5>
+                        <small class="text-muted">Registered Patient</small>
+                    </div>
+                    <hr>
+                    <form method="POST" action="{{ url_for('home') }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="role" value="Patient">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter patient email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-custom patient w-100 mb-4"><i class="fa-solid fa-lock me-2"></i>Login as Patient</button>
+                    </form>
+                    
+                    <div class="text-center text-muted" style="font-size: 0.8rem;">
+                        Don't have an account? <a href="{{ url_for('register', role='Patient') }}" class="text-decoration-none" style="color: #fd7e14;">Register Here</a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top border-2 p-3 text-secondary" style="border-color: #fd7e14 !important; font-size: 0.8rem;">
+                    <div class="d-flex align-items-start">
+                        <i class="fa-solid fa-user me-2 mt-1" style="color: #fd7e14;"></i>
+                        <div><strong class="d-block" style="color: #fd7e14;">Patient Access</strong>Book appointments, view reports, prescriptions and medical history.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

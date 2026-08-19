@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nurse Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow" style="width: 400px;">
+            <h2 class="text-center text-info mb-4">Nurse Hub Login</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    <label class="form-label">Nurse Email</label>
+                    {{ form.email(class="form-control", placeholder="nurse@hospital.com") }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    {{ form.password(class="form-control", placeholder="••••••••") }}
+                </div>
+                <button type="submit" class="btn btn-info text-white w-100 mt-2">Login to Ward Hub</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('home') }}" class="text-decoration-none">← Back to Selection</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

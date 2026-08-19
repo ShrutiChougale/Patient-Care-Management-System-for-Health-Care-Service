@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <div class="card shadow-sm border-0 mx-auto" style="max-width: 550px;">
+        <div class="card-body p-5">
+            <div class="text-danger mb-3">
+                <i class="fa-solid fa-triangle-exclamation display-1"></i>
+            </div>
+            <h2 class="fw-bold text-dark">403 - Access Denied</h2>
+            <p class="text-muted fs-5">You do not have authorization or permission to access this module.</p>
+            {% if required_roles %}
+            <div class="alert alert-warning py-2 px-3 d-inline-block small mb-4">
+                <strong>Required Roles:</strong> {{ required_roles | join(', ') }}
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-house me-2"></i>Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

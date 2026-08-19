@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4 mx-auto shadow-sm border-0" style="max-width: 850px;">
+    <h4 class="fw-bold mb-4 text-dark border-bottom pb-3"><i class="fa-solid fa-address-card text-success me-2"></i>Clinical Intake Form</h4>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="row g-3 mb-3">
+            <div class="col-md-8">
+                <label class="form-label small fw-bold text-secondary">Patient Full Name *</label>
+                {{ form.full_name(class="form-control") }}
+                {% if form.full_name.errors %}<div class="text-danger small">{{ form.full_name.errors[0] }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Age *</label>
+                {{ form.age(class="form-control") }}
+                {% if form.age.errors %}<div class="text-danger small">{{ form.age.errors[0] }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Gender *</label>
+                {{ form.gender(class="form-select") }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Blood Type *</label>
+                {{ form.blood_group(class="form-select") }}
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Primary Mobile Number *</label>
+                {{ form.phone_number(class="form-control") }}
+                {% if form.phone_number.errors %}<div class="text-danger small">{{ form.phone_number.errors[0] }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Email Address</label>
+                {{ form.email(class="form-control") }}
+                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors[0] }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary"><i class="fa-solid fa-id-card me-1 text-primary"></i>Aadhaar Number (12 Digits)</label>
+                {{ form.aadhaar_number(class="form-control", placeholder="e.g. 123456789012", maxlength="14") }}
+                {% if form.aadhaar_number.errors %}<div class="text-danger small">{{ form.aadhaar_number.errors[0] }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary">Address *</label>
+            {{ form.address(class="form-control", rows=2) }}
+            {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors[0] }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+            <label class="form-label small fw-bold text-secondary">Medical Background Summary</label>
+            {{ form.medical_history(class="form-control", rows=2) }}
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success px-4 py-2">Commit Patient Entry</button>
+            <a href="{{ url_for('patient_list') }}" class="btn btn-light px-4 py-2 border">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

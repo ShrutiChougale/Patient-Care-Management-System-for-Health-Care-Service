@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-network-wired text-primary me-2"></i>System Integration Overview</h3>
+        <p class="text-muted mb-0" style="font-size:0.95rem;">All modules integrated successfully. End-to-end workflow is operational.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <span class="badge bg-success px-3 py-2 rounded-pill fs-7"><i class="fa-solid fa-circle-check me-1"></i> All Systems Operational</span>
+        <span class="badge bg-white text-dark border px-3 py-2 shadow-sm rounded-3">
+            <i class="fa-regular fa-calendar me-1 text-primary"></i>{{ system_time_str }}
+        </span>
+    </div>
+</div>
+
+<!-- 5 Top Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-lg col-md-4 col-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 text-center">
+            <div class="fs-1 fw-bold text-primary">{{ total_modules }}/{{ total_modules }}</div>
+            <div class="fw-semibold text-dark">Integrated Modules</div>
+            <div class="text-success small mt-1"><i class="fa-solid fa-arrow-up me-1"></i>100% Integrated</div>
+        </div>
+    </div>
+    <div class="col-lg col-md-4 col-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 text-center">
+            <div class="fs-1 fw-bold text-success">12</div>
+            <div class="fw-semibold text-dark">Successful Workflows</div>
+            <div class="text-success small mt-1"><i class="fa-solid fa-check-circle me-1"></i>End-to-End Verified</div>
+        </div>
+    </div>
+    <div class="col-lg col-md-4 col-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 text-center">
+            <div class="fs-1 fw-bold text-warning">{{ total_api }}/{{ total_api }}</div>
+            <div class="fw-semibold text-dark">API Connections</div>
+            <div class="text-success small mt-1"><i class="fa-solid fa-plug me-1"></i>All Connected</div>
+        </div>
+    </div>
+    <div class="col-lg col-md-6 col-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 text-center">
+            <div class="fs-2 fw-bold" style="color:#7c3aed;">{{ last_sync }}</div>
+            <div class="fw-semibold text-dark">Last Sync Time</div>
+            <div class="text-muted small mt-1">Today</div>
+        </div>
+    </div>
+    <div class="col-lg col-md-6 col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 text-center">
+            <div class="fs-2 fw-bold text-info">Excellent</div>
+            <div class="fw-semibold text-dark">System Health</div>
+            <div class="text-success small mt-1"><i class="fa-solid fa-shield-check me-1"></i>No Issues Detected</div>
+        </div>
+    </div>
+</div>
+
+<!-- End-to-End Workflow Stepper -->
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-route me-2 text-primary"></i>End-to-End Patient Workflow</h6>
+    </div>
+    <div class="card-body">
+        <div class="d-flex align-items-start justify-content-center flex-wrap gap-0" style="overflow-x:auto;">
+            {% for step in workflow_steps %}
+            <div class="text-center px-2" style="min-width:120px; max-width:140px;">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    {% if not loop.first %}
+                    <div style="width:20px; height:2px; background:#198754;"></div>
+                    {% endif %}
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white fw-bold shadow"
+                         style="width:40px; height:40px; background:{{ step.color }}; font-size:0.8rem; flex-shrink:0;">
+                        {{ step.step }}
+                    </div>
+                    {% if not loop.last %}
+                    <div style="width:20px; height:2px; background:#198754;"></div>
+                    {% endif %}
+                </div>
+                <div class="mb-1"><i class="fa-solid {{ step.icon }} fs-5" style="color:{{ step.color }};"></i></div>
+                <div class="fw-bold text-dark" style="font-size:0.78rem;">{{ step.title }}</div>
+                <div class="text-muted" style="font-size:0.68rem; line-height:1.3; margin-top:3px;">{{ step.desc }}</div>
+                <div class="mt-2">
+                    <span class="badge bg-success-subtle text-success border border-success" style="font-size:0.65rem;">
+                        <i class="fa-solid fa-check me-1"></i>{{ step.status }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="alert alert-success border-0 mt-4 mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-circle-check fs-5"></i>
+            <span>All modules are integrated and working seamlessly. Data flows correctly between modules.</span>
+        </div>
+    </div>
+</div>
+
+<!-- Module + API Status Tables -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-cubes me-2 text-primary"></i>Module Integration Status</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>Module</th><th>Status</th><th>Connection</th><th>Last Sync</th><th>Records</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for m in modules %}
+                            <tr>
+                                <td><i class="fa-solid fa-cube me-2 text-primary"></i><strong>{{ m.name }}</strong></td>
+                                <td><span class="badge bg-success-subtle text-success border border-success"><i class="fa-solid fa-circle-check me-1"></i>{{ m.status }}</span></td>
+                                <td><span class="badge bg-info-subtle text-info border border-info">{{ m.connection }}</span></td>
+                                <td class="text-muted small">{{ m.sync_time }}</td>
+                                <td class="fw-semibold">{{ m.records }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-plug-circle-check me-2 text-success"></i>API Integration Status</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>API Service</th><th>Status</th><th>Response</th><th>Health</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for api in api_services %}
+                            <tr>
+                                <td><i class="fa-solid fa-file-code me-2 text-primary"></i><span class="fw-semibold">{{ api.name }}</span></td>
+                                <td><span class="badge bg-success-subtle text-success border border-success" style="font-size:0.7rem;">{{ api.status }}</span></td>
+                                <td class="text-muted small">{{ api.response_time }}</td>
+                                <td><span class="text-success fw-semibold small"><i class="fa-solid fa-circle me-1" style="font-size:0.5rem;"></i>{{ api.health }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 text-end">
+                    <a href="{{ url_for('testing_optimization') }}" class="text-primary text-decoration-none fw-semibold small">
+                        View API Documentation <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

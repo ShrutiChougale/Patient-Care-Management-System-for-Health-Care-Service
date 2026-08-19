@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+    <h4 class="fw-bold" style="color: #6f42c1;">Nurse Dashboard</h4>
+    <p class="text-muted">Welcome, {{ current_user.full_name }}</p>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header text-white fw-bold" style="background-color: #6f42c1;">
+                <i class="fa-solid fa-user-nurse me-2"></i>My Profile
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><th style="width: 150px;">Name:</th><td>{{ current_user.full_name }}</td></tr>
+                    <tr><th>Email:</th><td>{{ current_user.email }}</td></tr>
+                    <tr><th>Phone:</th><td>{{ current_user.phone_number }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100 border-primary">
+            <div class="card-body text-center py-5">
+                <i class="fa-solid fa-clipboard-list fs-1 text-primary opacity-50 mb-3"></i>
+                <h5 class="text-secondary">Assigned Wards & Duties</h5>
+                <button class="btn btn-primary mt-3">View Active Patient Vitals</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

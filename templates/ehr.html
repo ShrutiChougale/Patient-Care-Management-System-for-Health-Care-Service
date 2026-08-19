@@ -1,0 +1,567 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Custom Breadcrumb -->
+<div class="custom-breadcrumb mb-2">
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> &gt; <a href="{{ url_for('ehr_detail') }}">EHR</a> &gt; <span>Patient Record</span>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="fw-bold text-dark mb-0">
+        <i class="fa-regular fa-clipboard me-2 text-primary"></i>Electronic Health Record (EHR)
+    </h3>
+    <div>
+        <select class="form-select" onchange="window.location.href='/ehr/' + this.value;">
+            {% for p in all_patients %}
+            <option value="{{ p.id }}" {% if p.id == patient.id %}selected{% endif %}>
+                Switch Patient: {{ p.full_name }} ({{ p.patient_code }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<!-- Patient Header Card -->
+<div class="patient-header-card shadow-sm">
+    <div class="d-flex align-items-center gap-4">
+        <div class="patient-avatar">
+            <i class="fa-solid fa-user"></i>
+        </div>
+        <div>
+            <h4 class="fw-bold mb-1 text-primary">{{ patient.full_name }}</h4>
+            <div class="fs-7 text-muted mb-2">
+                <strong>Patient ID :</strong> {{ patient.patient_code }}
+            </div>
+            <div class="fs-7 text-secondary">
+                <strong>Gender :</strong> {{ patient.gender }} &nbsp;|&nbsp; <strong>Age :</strong> {{ patient.age }} Years &nbsp;|&nbsp; <strong>Phone :</strong> {{ patient.phone_number }}
+            </div>
+        </div>
+    </div>
+
+    <div class="patient-meta-grid text-start">
+        <div><span class="meta-lbl">Blood Group :</span> <span class="meta-val">{{ patient.blood_group }}</span></div>
+        <div><span class="meta-lbl">Aadhaar :</span> <span class="meta-val fw-bold text-dark">{{ patient.masked_aadhaar }}</span></div>
+        <div><span class="meta-lbl">Date of Birth :</span> <span class="meta-val">{{ patient.date_of_birth or '15-05-1996' }}</span></div>
+        <div><span class="meta-lbl">Address :</span> <span class="meta-val">{{ patient.address }}</span></div>
+    </div>
+
+    <div class="d-flex flex-column gap-2">
+        <button class="btn btn-primary-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#editSummaryModal">
+            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Vitals
+        </button>
+        <button class="btn btn-success-green shadow-sm" onclick="window.print();">
+            <i class="fa-solid fa-print me-1"></i> Print Record
+        </button>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs nav-tabs-custom" id="ehrTab" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-tab-pane" type="button">Medical Summary</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="diagnosis-tab" data-bs-toggle="tab" data-bs-target="#diagnosis-tab-pane" type="button">Diagnosis History</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="allergies-tab" data-bs-toggle="tab" data-bs-target="#allergies-tab-pane" type="button">Allergies</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="medications-tab" data-bs-toggle="tab" data-bs-target="#medications-tab-pane" type="button">Medications</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="lab-tab" data-bs-toggle="tab" data-bs-target="#lab-tab-pane" type="button">Lab Reports</button>
+    </li>
+</ul>
+
+<!-- Tab Contents -->
+<div class="tab-content" id="ehrTabContent">
+
+    <!-- Active Tab: Medical Summary Grid -->
+    <div class="tab-pane fade show active" id="summary-tab-pane" role="tabpanel">
+        <div class="row g-3">
+            
+            <!-- Box 1: Medical Summary Table -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card-custom h-100 p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold mb-0 text-primary"><i class="fa-regular fa-file-lines me-2"></i>Medical Summary Vitals</h6>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#editSummaryModal">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                    </div>
+                    <table class="table table-bordered table-custom align-middle">
+                        <tbody>
+                            <tr><th style="width: 40%; background: #f8fafc;">Height</th><td>{{ patient.height or '175 cm' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">Weight</th><td>{{ patient.weight or '72 kg' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">BMI</th><td>{{ patient.bmi or '23.5' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">Smoking</th><td>{{ patient.smoking or 'No' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">Alcohol</th><td>{{ patient.alcohol or 'Occasional' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">Chronic Diseases</th><td>{{ patient.chronic_diseases or 'No' }}</td></tr>
+                            <tr><th style="background: #f8fafc;">Remarks</th><td>{{ patient.remarks or 'Patient is healthy.' }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Box 2 & 3: Right Stack (Allergies & Current Medications) -->
+            <div class="col-lg-6 col-md-12 d-flex flex-column gap-3">
+                
+                <!-- Allergies Box -->
+                <div class="card-custom p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="fw-bold mb-0 text-danger"><i class="fa-solid fa-virus me-2"></i>Allergies</h6>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#addAllergyModal">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <table class="table table-custom align-middle" id="allergiesTable">
+                        <thead>
+                            <tr>
+                                <th>Allergen</th>
+                                <th>Reaction</th>
+                                <th>Added On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in patient.allergies %}
+                            <tr>
+                                <td class="fw-semibold text-dark">{{ a.allergen }}</td>
+                                <td>{{ a.reaction }}</td>
+                                <td>{{ a.added_on }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center text-muted fs-7">No registered allergies.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Current Medications Box -->
+                <div class="card-custom p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="fw-bold mb-0 text-success"><i class="fa-solid fa-capsules me-2"></i>Current Medications / Prescriptions</h6>
+                        <button class="btn btn-sm btn-outline-success py-0 px-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#addMedicationModal">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <table class="table table-custom align-middle" id="medicationsTable">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th>Start Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in patient.prescriptions %}
+                            <tr>
+                                <td class="fw-semibold text-dark">{{ m.medicine }}</td>
+                                <td>{{ m.dosage }}</td>
+                                <td>{{ m.frequency }}</td>
+                                <td>{{ m.start_date }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted fs-7">No active medications.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Box 4: Recent Diagnosis History -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card-custom h-100 p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="fw-bold mb-0 text-purple" style="color:#7c3aed;"><i class="fa-solid fa-clipboard-check me-2"></i>Recent Diagnosis History</h6>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#addDiagnosisModal">
+                            <i class="fa-solid fa-plus"></i> Add Diagnosis
+                        </button>
+                    </div>
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Diagnosis</th>
+                                <th>Doctor</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in patient.diagnoses %}
+                            <tr>
+                                <td>{{ d.diagnosis_date }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ d.diagnosis_name }}</span></td>
+                                <td>{{ d.doctor_name }}</td>
+                                <td class="fs-7">{{ d.notes }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted fs-7">No diagnosis history recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Box 5: Past Lab Reports -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card-custom h-100 p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-flask me-2"></i>Lab Reports</h6>
+                        <a href="{{ url_for('lab_management') }}" class="btn btn-sm btn-outline-secondary py-0 px-2 fs-7">View All</a>
+                    </div>
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Test Date</th>
+                                <th>Result</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for l in patient.lab_reports %}
+                            <tr>
+                                <td class="fw-semibold text-dark">{{ l.test_name }}</td>
+                                <td>{{ l.test_date }}</td>
+                                <td>
+                                    {% if l.result == 'Normal' %}
+                                    <span class="badge bg-success">Normal</span>
+                                    {% elif l.result == 'Borderline' %}
+                                    <span class="badge bg-warning text-dark">Borderline</span>
+                                    {% elif l.result == 'Critical' %}
+                                    <span class="badge bg-danger">Critical</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick="alert('Lab Test: {{ l.test_name }}\nStatus: {{ l.result }}\nDate: {{ l.test_date }}');">
+                                        <i class="fa-regular fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted fs-7">No lab reports found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Secondary Tabs Content -->
+    <div class="tab-pane fade" id="diagnosis-tab-pane">
+        <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-primary mb-0">Complete Diagnosis Records</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addDiagnosisModal"><i class="fa-solid fa-plus me-1"></i> Add Diagnosis</button>
+            </div>
+            <ul class="list-group">
+                {% for d in patient.diagnoses %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">{{ d.diagnosis_name }}</h6>
+                        <small class="text-muted">Doctor: {{ d.doctor_name }} | Date: {{ d.diagnosis_date }}</small>
+                        <p class="mb-0 text-secondary fs-7 mt-1">{{ d.notes }}</p>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">Verified</span>
+                </li>
+                {% else %}
+                <li class="list-group-item text-center text-muted py-3">No diagnosis records found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="allergies-tab-pane">
+        <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-danger mb-0">Registered Allergies</h5>
+                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#addAllergyModal"><i class="fa-solid fa-plus me-1"></i> Add Allergy</button>
+            </div>
+            {% for a in patient.allergies %}
+            <div class="alert alert-danger mb-2">
+                <strong>{{ a.allergen }}</strong> — Reaction: {{ a.reaction }} (Added on {{ a.added_on }})
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center text-muted">No allergies recorded.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="medications-tab-pane">
+        <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-success mb-0">Prescription & Medication Records</h5>
+                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addMedicationModal"><i class="fa-solid fa-plus me-1"></i> Add Medication</button>
+            </div>
+            {% for m in patient.prescriptions %}
+            <div class="p-3 border rounded mb-2 bg-light">
+                <h6><strong class="text-dark">{{ m.medicine }}</strong></h6>
+                <p class="mb-0 text-muted fs-7">Dosage: {{ m.dosage }} | Frequency: {{ m.frequency }} | Duration: {{ m.duration }} | Prescribed by: {{ m.doctor_name }}</p>
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center text-muted">No prescriptions recorded.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="lab-tab-pane">
+        <div class="card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-purple mb-0" style="color:#7c3aed;">All Lab Reports</h5>
+                <a href="{{ url_for('lab_management') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-flask me-1"></i> Lab Management Portal</a>
+            </div>
+            {% for l in patient.lab_reports %}
+            <div class="p-3 border rounded mb-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0"><strong class="text-dark">{{ l.test_name }}</strong></h6>
+                    <small class="text-muted">Test Date: {{ l.test_date }}</small>
+                </div>
+                <div>
+                    {% if l.result == 'Normal' %}
+                    <span class="badge bg-success">Normal</span>
+                    {% elif l.result == 'Borderline' %}
+                    <span class="badge bg-warning text-dark">Borderline</span>
+                    {% elif l.result == 'Critical' %}
+                    <span class="badge bg-danger">Critical</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center text-muted">No lab reports found.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Banner -->
+<div class="alert alert-info border-0 rounded-3 mt-4 text-center text-primary-emphasis fs-7 shadow-sm">
+    <i class="fa-solid fa-circle-info me-2"></i> All patient health information is confidential and secured under HIPAA/DISHA guidelines.
+</div>
+
+<!-- REAL-TIME MODALS -->
+<!-- 1. Add Allergy Modal -->
+<div class="modal fade" id="addAllergyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-danger"><i class="fa-solid fa-virus me-2"></i>Add Patient Allergy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="allergyForm">
+                    <input type="hidden" id="allergyPatientId" value="{{ patient.id }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Allergen Name *</label>
+                        <input type="text" id="allergenInput" class="form-control" placeholder="e.g. Penicillin, Peanuts" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Reaction *</label>
+                        <input type="text" id="reactionInput" class="form-control" placeholder="e.g. Rash, Swelling, Anaphylaxis" required>
+                    </div>
+                    <button type="button" class="btn btn-danger w-100 fw-semibold py-2" onclick="submitRealtimeAllergy()">
+                        <i class="fa-solid fa-plus me-1"></i> Save Allergy
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Add Medication Modal -->
+<div class="modal fade" id="addMedicationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-success"><i class="fa-solid fa-prescription me-2"></i>Add Current Medication</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="medicationForm">
+                    <input type="hidden" id="medPatientId" value="{{ patient.id }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Medicine Name *</label>
+                        <input type="text" id="medicineInput" class="form-control" placeholder="e.g. Paracetamol 500 mg" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Dosage *</label>
+                            <input type="text" id="dosageInput" class="form-control" placeholder="e.g. 500 mg" value="1 Tablet" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Frequency *</label>
+                            <input type="text" id="frequencyInput" class="form-control" placeholder="e.g. Twice daily" value="Twice Daily" required>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success w-100 fw-semibold py-2" onclick="submitRealtimeMedication()">
+                        <i class="fa-solid fa-plus me-1"></i> Save Medication
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Add Diagnosis Modal -->
+<div class="modal fade" id="addDiagnosisModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-primary"><i class="fa-solid fa-clipboard-check me-2"></i>Add Patient Diagnosis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="diagnosisForm">
+                    <input type="hidden" id="diagPatientId" value="{{ patient.id }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Diagnosis Name *</label>
+                        <input type="text" id="diagNameInput" class="form-control" placeholder="e.g. Acute Gastritis, Hypertension" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Doctor Name</label>
+                        <input type="text" id="diagDoctorInput" class="form-control" value="{{ current_user.full_name if current_user.is_authenticated else 'Dr. Priya' }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Clinical Notes / Observations</label>
+                        <textarea id="diagNotesInput" class="form-control" rows="3" placeholder="Clinical observations and advice..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 fw-semibold py-2" onclick="submitRealtimeDiagnosis()">
+                        <i class="fa-solid fa-plus me-1"></i> Save Diagnosis
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Edit EHR Summary Vitals Modal -->
+<div class="modal fade" id="editSummaryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold text-primary"><i class="fa-solid fa-file-pen me-2"></i>Edit Medical Summary Vitals</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('api_update_ehr_summary') }}" method="POST">
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Height</label>
+                            <input type="text" name="height" class="form-control" value="{{ patient.height or '175 cm' }}">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Weight</label>
+                            <input type="text" name="weight" class="form-control" value="{{ patient.weight or '72 kg' }}">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold">BMI</label>
+                            <input type="text" name="bmi" class="form-control" value="{{ patient.bmi or '23.5' }}">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Smoking</label>
+                            <input type="text" name="smoking" class="form-control" value="{{ patient.smoking or 'No' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Alcohol</label>
+                            <input type="text" name="alcohol" class="form-control" value="{{ patient.alcohol or 'Occasional' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chronic Diseases</label>
+                        <input type="text" name="chronic_diseases" class="form-control" value="{{ patient.chronic_diseases or 'No' }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Clinical Remarks</label>
+                        <textarea name="remarks" class="form-control" rows="2">{{ patient.remarks or 'Patient is healthy.' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Update Medical Summary
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function submitRealtimeAllergy() {
+        const patientId = document.getElementById('allergyPatientId').value;
+        const allergen = document.getElementById('allergenInput').value;
+        const reaction = document.getElementById('reactionInput').value;
+
+        if (!allergen || !reaction) return alert('Please fill in allergen and reaction.');
+
+        fetch('/api/allergies/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patient_id: patientId, allergen: allergen, reaction: reaction })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to save allergy.'));
+            }
+        });
+    }
+
+    function submitRealtimeMedication() {
+        const patientId = document.getElementById('medPatientId').value;
+        const medicine = document.getElementById('medicineInput').value;
+        const dosage = document.getElementById('dosageInput').value;
+        const frequency = document.getElementById('frequencyInput').value;
+
+        if (!medicine || !dosage || !frequency) return alert('Please fill in all medication details.');
+
+        fetch('/api/medications/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patient_id: patientId, medicine: medicine, dosage: dosage, frequency: frequency })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to save medication.'));
+            }
+        });
+    }
+
+    function submitRealtimeDiagnosis() {
+        const patientId = document.getElementById('diagPatientId').value;
+        const diagnosisName = document.getElementById('diagNameInput').value;
+        const doctorName = document.getElementById('diagDoctorInput').value;
+        const notes = document.getElementById('diagNotesInput').value;
+
+        if (!diagnosisName) return alert('Please enter diagnosis name.');
+
+        fetch('/api/diagnoses/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patient_id: patientId, diagnosis_name: diagnosisName, doctor_name: doctorName, notes: notes })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to save diagnosis.'));
+            }
+        });
+    }
+</script>
+{% endblock %}

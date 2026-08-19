@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="mb-3"><h4 class="fw-bold text-dark">Doctor Management</h4></div>
+    
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-white pt-3"><h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-user-doctor me-2"></i>Add New Doctor</h6></div>
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="row g-3">
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Doctor Name</label>{{ form.doctor_name(class="form-control form-control-sm") }}</div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Specialization</label>{{ form.specialization(class="form-select form-select-sm") }}</div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Qualification</label>{{ form.qualification(class="form-control form-control-sm") }}</div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Department</label>{{ form.department(class="form-select form-select-sm") }}</div>
+                </div>
+                <div class="row g-3 mt-1 align-items-end">
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Phone Number</label>{{ form.phone_number(class="form-control form-control-sm") }}</div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Email Address</label>{{ form.email_address(class="form-control form-control-sm") }}</div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold text-secondary">Available Time</label>{{ form.available_time(class="form-control form-control-sm", placeholder="10:00 AM - 02:00 PM") }}</div>
+                    <div class="col-md-3"><button type="submit" class="btn btn-success btn-sm w-100 text-white fw-bold">Add Doctor</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body px-0 pt-3">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary small text-uppercase">
+                    <tr><th class="ps-4">Doctor ID</th><th>Doctor Name</th><th>Specialization</th><th>Department</th><th>Available Time</th><th class="text-center pe-4">Actions</th></tr>
+                </thead>
+                <tbody class="small">
+                    {% for doc in doctors %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">DOC00{{ doc.id }}</td>
+                        <td class="fw-bold text-dark">{{ doc.doctor_name }}</td>
+                        <td>{{ doc.specialization }}</td>
+                        <td>{{ doc.department }}</td>
+                        <td class="fw-semibold text-success">{{ doc.available_time }}</td>
+                        <td class="text-center pe-4">
+                            <form method="POST" action="{{ url_for('delete_doctor', doctor_id=doc.id) }}"><button type="submit" class="btn btn-sm btn-danger py-1 px-2"><i class="fa-solid fa-trash-can"></i></button></form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

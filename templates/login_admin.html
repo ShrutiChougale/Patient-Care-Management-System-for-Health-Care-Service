@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block login_content %}
+<div class="container py-5">
+    <div class="row justify-content-center"><div class="col-md-4 mt-5">
+        <div class="card p-4 border-top border-primary border-4 shadow">
+            <div class="text-center text-primary mb-4"><i class="fa-solid fa-shield-halved fs-1"></i><h4 class="fw-bold mt-2">Admin Gateway</h4></div>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3"><label class="form-label small fw-bold">E-mail</label>{{ form.email(class="form-control", placeholder="admin@ipcms.com") }}</div>
+                <div class="mb-4"><label class="form-label small fw-bold">Password</label>{{ form.password(class="form-control", placeholder="••••••••") }}</div>
+                <button type="submit" class="btn btn-primary w-100 py-2">Authorize Access</button>
+            </form>
+            <a href="{{ url_for('home') }}" class="d-block text-center mt-3 text-secondary small">Back to Portal Selector</a>
+        </div>
+    </div></div>
+</div>
+{% endblock %}

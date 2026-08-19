@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">System Executive Dashboard</h3>
+        <p class="text-muted mb-0 small">Real-Time Operational Monitoring &amp; Integrated Patient Care Subsystem</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span id="realtime-indicator" class="badge bg-white text-muted border px-3 py-2 shadow-sm rounded-3 small">
+            <i class="fa-solid fa-circle-notch fa-spin me-1 text-primary" style="font-size:0.7rem;"></i>Live Monitoring
+        </span>
+        <span class="badge bg-white text-dark border px-3 py-2 shadow-sm rounded-3">
+            <i class="fa-regular fa-calendar me-2 text-primary"></i>{{ system_time_str }}
+        </span>
+    </div>
+</div>
+
+<!-- SECTION 1: Top 4 Primary Dynamic Stat Cards (From Screenshot 2) -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 text-center h-100">
+            <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:52px; height:52px; background-color: #eff6ff; color: #3b82f6;">
+                    <i class="fa-solid fa-users fs-4"></i>
+                </div>
+            </div>
+            <div class="text-muted small fw-semibold">Total Patients</div>
+            <h2 id="stat-total-patients" class="fw-bold my-1 text-primary">{{ total_patients }}</h2>
+            <div>
+                <a href="{{ url_for('patient_list') }}" class="small text-decoration-none text-secondary fw-semibold">View Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 text-center h-100">
+            <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:52px; height:52px; background-color: #f0fdf4; color: #22c55e;">
+                    <i class="fa-solid fa-user-doctor fs-4"></i>
+                </div>
+            </div>
+            <div class="text-muted small fw-semibold">Total Doctors</div>
+            <h2 id="stat-total-doctors" class="fw-bold my-1 text-success">{{ total_doctors }}</h2>
+            <div>
+                <a href="{{ url_for('doctor_management') }}" class="small text-decoration-none text-secondary fw-semibold">View Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 text-center h-100">
+            <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:52px; height:52px; background-color: #faf5ff; color: #a855f7;">
+                    <i class="fa-solid fa-user-nurse fs-4"></i>
+                </div>
+            </div>
+            <div class="text-muted small fw-semibold">Total Nurses</div>
+            <h2 id="stat-total-nurses" class="fw-bold my-1 text-purple" style="color:#a855f7;">{{ total_nurses }}</h2>
+            <div>
+                <a href="{{ url_for('system_integration') }}" class="small text-decoration-none text-secondary fw-semibold">View Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 text-center h-100">
+            <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:52px; height:52px; background-color: #fff7ed; color: #f97316;">
+                    <i class="fa-solid fa-calendar-day fs-4"></i>
+                </div>
+            </div>
+            <div class="text-muted small fw-semibold">Today's Appointments</div>
+            <h2 id="stat-today-appointments" class="fw-bold my-1 text-warning" style="color:#f97316;">{{ today_appointments_count }}</h2>
+            <div>
+                <a href="{{ url_for('appointments') }}" class="small text-decoration-none text-secondary fw-semibold">View Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: 6 Executive Sparkline Metric Cards -->
+<div class="row g-3 mb-4">
+    <!-- 1. Total Patients Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #e0f2fe; color: #0284c7;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">Total Patients</div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ total_patients }}</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-success" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-up me-1"></i>8.5% <span class="text-muted fw-normal">last month</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 16 Q 20 10, 40 14 T 80 6 T 100 2" stroke="#0284c7" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 2. Today's Appointments Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #dcfce7; color: #16a34a;">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">Appointments</div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ today_appointments_count }}</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-success" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-up me-1"></i>12.3% <span class="text-muted fw-normal">yesterday</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 18 Q 25 12, 50 10 T 75 4 T 100 1" stroke="#16a34a" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 3. Consultations Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #f3e8ff; color: #9333ea;">
+                    <i class="fa-solid fa-stethoscope"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">Consultations</div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ total_consultations }}</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-success" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-up me-1"></i>9.2% <span class="text-muted fw-normal">yesterday</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 14 Q 30 18, 50 8 T 80 10 T 100 2" stroke="#9333ea" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 4. Lab Reports Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #ffedd5; color: #ea580c;">
+                    <i class="fa-solid fa-flask"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">Lab Reports</div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ total_lab_tests }}</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-danger" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-down me-1"></i>5.6% <span class="text-muted fw-normal">yesterday</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 4 Q 25 16, 50 6 T 75 12 T 100 8" stroke="#ea580c" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 5. Total Revenue Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #ecfdf5; color: #059669;">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">Total Revenue</div>
+                    <h5 class="fw-bold mb-0 text-dark">₹ {{ "%.0f"|format(total_revenue) }}</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-success" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-up me-1"></i>7.8% <span class="text-muted fw-normal">yesterday</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 16 Q 30 8, 60 12 T 100 2" stroke="#059669" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 6. System Uptime Sparkline -->
+    <div class="col-xl-2 col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 position-relative overflow-hidden">
+            <div class="d-flex align-items-center gap-2.5 mb-1">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: #e0e7ff; color: #4f46e5;">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <div class="text-muted small fw-semibold" style="font-size:0.75rem;">System Uptime</div>
+                    <h5 class="fw-bold mb-0 text-dark">99.98%</h5>
+                </div>
+            </div>
+            <div class="pt-1">
+                <span class="small fw-semibold text-success" style="font-size:0.75rem;"><i class="fa-solid fa-arrow-up me-1"></i>0.02% <span class="text-muted fw-normal">improved</span></span>
+            </div>
+            <svg class="w-100 mt-2" height="20" viewBox="0 0 100 20" fill="none">
+                <path d="M0 14 Q 25 6, 50 10 T 75 4 T 100 1" stroke="#4f46e5" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 3: Charts & Department Breakdown Row -->
+<div class="row g-3 mb-4">
+    <!-- Appointments Overview Chart -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0 text-dark">Appointments Overview</h6>
+                <select class="form-select form-select-sm w-auto py-1 px-2">
+                    <option selected>This Week</option>
+                    <option>This Month</option>
+                </select>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="appointmentsOverviewChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Wise Doctors (Dynamic real-time donut chart) -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0 text-dark">Department Wise Doctors</h6>
+                <a href="{{ url_for('doctor_management') }}" class="small text-primary text-decoration-none fw-semibold">View All</a>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div style="height: 210px; position: relative;" class="d-flex align-items-center justify-content-center">
+                        <canvas id="deptDoctorsChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex flex-column gap-2" style="font-size: 0.85rem;">
+                        {% for dept_name, count in dept_counts.items() %}
+                        <div class="d-flex align-items-center justify-content-between p-1.5 rounded bg-light">
+                            <span>
+                                <i class="fa-solid fa-circle me-2" style="color: {% if loop.index == 1 %}#0d6efd{% elif loop.index == 2 %}#198754{% elif loop.index == 3 %}#fd7e14{% elif loop.index == 4 %}#6f42c1{% else %}#6c757d{% endif %};"></i>
+                                <strong>{{ dept_name }}</strong>
+                            </span>
+                            <span class="badge bg-white text-dark border font-bold">({{ count }})</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 4: Tables Row (Recent Patient Registrations & Today's Appointments from Screenshot 2) -->
+<div class="row g-3 mb-4">
+    <!-- Recent Patient Registrations -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-plus me-2 text-primary"></i>Recent Patient Registrations</h6>
+                    <a href="{{ url_for('patient_list') }}" class="small text-primary text-decoration-none fw-semibold">View All Patients</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Registered Code</th>
+                                <th>Gender</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_patients %}
+                            <tr>
+                                <td class="fw-bold text-primary">P00{{ p.id }}</td>
+                                <td class="fw-semibold text-dark">{{ p.full_name }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ p.patient_code }}</span></td>
+                                <td>{{ p.gender }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">No recent patient registrations.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-3 text-start">
+                <a href="{{ url_for('patient_list') }}" class="small text-primary text-decoration-none fw-semibold">
+                    <i class="fa-solid fa-arrow-right me-1"></i>View All Patients
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Appointments Table -->
+    <div class="col-lg-6 col-md-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-calendar-check me-2 text-success"></i>Today's Appointments</h6>
+                    <a href="{{ url_for('appointments') }}" class="small text-primary text-decoration-none fw-semibold">View All Appointments</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Doctor Name</th>
+                                <th>Time / Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in today_appts_display %}
+                            <tr>
+                                <td class="fw-bold text-success">A00{{ appt.id }}</td>
+                                <td class="fw-semibold text-dark">{{ appt.patient.full_name if appt.patient else 'Patient' }}</td>
+                                <td>{{ appt.doctor.doctor_name if appt.doctor else 'Doctor' }}</td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success border border-success">
+                                        {% if appt.appointment_time %}{{ appt.appointment_time.strftime('%I:%M %p') }}{% else %}--:--{% endif %}
+                                    </span>
+                                    <span class="ms-1 badge {% if appt.status == 'Completed' %}bg-success{% elif appt.status == 'Scheduled' %}bg-primary{% else %}bg-secondary{% endif %} bg-opacity-10 text-dark border" style="font-size:0.7rem;">{{ appt.status }}</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">No appointments scheduled for today.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-3 text-start">
+                <a href="{{ url_for('appointments') }}" class="small text-primary text-decoration-none fw-semibold">
+                    <i class="fa-solid fa-arrow-right me-1"></i>View All Appointments
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 5: Executive Analysis Row (Top Doctors, Revenue Overview, System Health) -->
+<div class="row g-3 mb-4">
+    <!-- Top Doctors (Ranked by Real Consultations) -->
+    <div class="col-lg-4 col-md-12">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0 text-dark">Top Doctors <span class="text-muted font-normal small">(Ranked)</span></h6>
+                <a href="{{ url_for('doctor_management') }}" class="small text-primary text-decoration-none fw-semibold">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:0.82rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Doctor Name</th>
+                            <th>Specialization</th>
+                            <th class="text-end">Consultations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in top_doctors_list %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:28px; height:28px; font-size:0.75rem;">
+                                        {{ doc.doctor_name[:2].upper() }}
+                                    </div>
+                                    <span class="fw-bold text-dark">{{ doc.doctor_name }}</span>
+                                </div>
+                            </td>
+                            <td class="text-muted">{{ doc.specialization }}</td>
+                            <td class="text-end fw-bold text-primary">{{ doc.consultations }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Overview -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <h6 class="fw-bold mb-3 text-dark">Revenue Overview</h6>
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div style="height: 170px; position: relative;" class="d-flex align-items-center justify-content-center">
+                        <canvas id="revenueOverviewChart"></canvas>
+                        <div class="position-absolute text-center" style="top:50%; left:50%; transform:translate(-50%, -50%);">
+                            <div class="small text-muted" style="font-size:0.65rem;">Total Revenue</div>
+                            <div class="fw-bold text-dark" style="font-size:0.85rem;">₹ {{ "%.0f"|format(total_revenue) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 ps-0">
+                    <div class="d-flex flex-column gap-2" style="font-size: 0.78rem;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-circle me-1 text-primary"></i>Consultations</span>
+                            <span class="fw-semibold">36%</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-circle me-1 text-info"></i>Lab Tests</span>
+                            <span class="fw-semibold">28%</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-circle me-1 text-warning"></i>Procedures</span>
+                            <span class="fw-semibold">21%</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-circle me-1 text-danger"></i>Medications</span>
+                            <span class="fw-semibold">13%</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fa-solid fa-circle me-1 text-secondary"></i>Others</span>
+                            <span class="fw-semibold">2%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0 text-dark">System Health Status</h6>
+                <a href="{{ url_for('testing_optimization') }}" class="small text-primary text-decoration-none fw-semibold">View Details</a>
+            </div>
+            <div class="d-flex flex-column gap-2.5">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                        <span class="fw-semibold text-dark small">Database</span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success">Healthy</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                        <span class="fw-semibold text-dark small">API Services</span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success">Healthy</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                        <span class="fw-semibold text-dark small">Server</span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success">Healthy</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                        <span class="fw-semibold text-dark small">Backup Service</span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success">Healthy</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                        <span class="fw-semibold text-dark small">Notification Service</span>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success">Healthy</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 6: Quick Actions Bar (From Screenshot 2) -->
+<div class="card border-0 shadow-sm rounded-3 p-3 mb-4">
+    <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-bolt me-2 text-warning"></i>Quick Actions</h6>
+    <div class="row g-3">
+        <div class="col-md-3 col-6">
+            <a href="{{ url_for('add_patient') }}" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> Add New Patient
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{{ url_for('doctor_management') }}" class="btn btn-success w-100 py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-user-doctor"></i> Add New Doctor
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{{ url_for('add_appointment') }}" class="btn text-white w-100 py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color:#7c3aed;">
+                <i class="fa-solid fa-calendar-plus"></i> New Appointment
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{{ url_for('reports') }}" class="btn btn-warning text-dark w-100 py-2.5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-file-lines"></i> Generate Report
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Appointments Overview Line Chart (Real 7-day data from Flask)
+    const apptCtx = document.getElementById('appointmentsOverviewChart');
+    if (apptCtx) {
+        const apptLabels = {{ appt_labels_json|safe }};
+        const apptCounts = {{ appt_counts_json|safe }};
+        new Chart(apptCtx, {
+            type: 'line',
+            data: {
+                labels: apptLabels,
+                datasets: [{
+                    label: 'Appointments',
+                    data: apptCounts,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2.5,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3b82f6',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'bottom' } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 2. Department Wise Doctors Donut Chart (Dynamic real-time values from Flask)
+    const deptCtx = document.getElementById('deptDoctorsChart');
+    if (deptCtx) {
+        const deptData = {{ dept_counts_json|safe }};
+        const labels = Object.keys(deptData);
+        const dataValues = Object.values(deptData);
+
+        new Chart(deptCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#6f42c1', '#6c757d', '#20c997'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 3. Revenue Overview Chart (Real data from paid bills)
+    const revCtx = document.getElementById('revenueOverviewChart');
+    if (revCtx) {
+        const revenueData = {{ revenue_breakdown_json|safe }};
+        new Chart(revCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Consultations', 'Lab Tests', 'Additional', 'Medications', 'Room Charges'],
+                datasets: [{
+                    data: revenueData,
+                    backgroundColor: ['#0d6efd', '#0dcaf0', '#ffc107', '#dc3545', '#6c757d'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                const val = ctx.parsed || 0;
+                                return ' ₹ ' + val.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// ===== REAL-TIME DASHBOARD POLLING (every 30 seconds) =====
+let apptChartInstance = null;
+
+(function initRealtimePolling() {
+    // Store reference to the appointments chart for live updates
+    const apptCtxEl = document.getElementById('appointmentsOverviewChart');
+    if (apptCtxEl) {
+        // Chart.js stores the chart instance in the canvas element
+        apptChartInstance = Chart.getChart(apptCtxEl);
+    }
+
+    function updateDashboardStats() {
+        fetch('/api/dashboard/realtime')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) return;
+                const s = data.stats;
+
+                // Update stat card values with smooth number animation
+                updateCardValue('stat-total-patients', s.total_patients);
+                updateCardValue('stat-total-doctors', s.total_doctors);
+                updateCardValue('stat-total-nurses', s.total_nurses);
+                updateCardValue('stat-today-appointments', s.today_appointments);
+
+                // Update last-refreshed indicator
+                const indicator = document.getElementById('realtime-indicator');
+                if (indicator) {
+                    indicator.textContent = 'Live · Updated ' + data.timestamp;
+                    indicator.classList.add('text-success');
+                }
+
+                // Update appointment trend chart
+                if (apptChartInstance && data.appt_trend) {
+                    apptChartInstance.data.labels = data.appt_trend.map(d => d.label);
+                    apptChartInstance.data.datasets[0].data = data.appt_trend.map(d => d.count);
+                    apptChartInstance.update('none');
+                }
+            })
+            .catch(() => {
+                const indicator = document.getElementById('realtime-indicator');
+                if (indicator) indicator.textContent = 'Offline — retrying...';
+            });
+    }
+
+    function updateCardValue(id, newVal) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const currentVal = parseInt(el.textContent) || 0;
+        if (currentVal === newVal) return;
+        // Brief flash animation to signal update
+        el.style.transition = 'color 0.4s';
+        el.style.color = '#22c55e';
+        el.textContent = newVal;
+        setTimeout(() => { el.style.color = ''; }, 800);
+    }
+
+    // Initial poll after 5 seconds, then every 30 seconds
+    setTimeout(updateDashboardStats, 5000);
+    setInterval(updateDashboardStats, 30000);
+})();
+</script>
+{% endblock %}

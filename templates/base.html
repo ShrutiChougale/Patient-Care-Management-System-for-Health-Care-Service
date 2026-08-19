@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Patient Care Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <!-- Top Header Bar -->
+    <header class="app-topbar d-flex justify-content-between align-items-center px-4 py-2">
+        <div class="brand-title d-flex align-items-center gap-2">
+            <span class="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-weight: 800;">
+                <i class="fa-solid fa-plus fs-5"></i>
+            </span>
+            <span class="fw-bold text-white fs-5">Integrated Patient Care System</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <!-- Day 5 Notification Bell Icon & Badge -->
+            <div class="dropdown">
+                <button class="btn btn-outline-light btn-sm position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px;">
+                    <i class="fa-solid fa-bell"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifBadge">
+                        {{ unread_notifications_count }}
+                    </span>
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu dropdown-menu-end p-2 shadow-lg" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                    <div class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom">
+                        <strong class="text-primary"><i class="fa-solid fa-bell me-1"></i> Notifications</strong>
+                        <a href="{{ url_for('notifications_page') }}" class="small text-decoration-none">View All</a>
+                    </div>
+                    {% if recent_notifications %}
+                        {% for n in recent_notifications %}
+                        <a href="{{ url_for('notifications_page') }}" class="dropdown-item py-2 px-2 border-bottom {% if n.status == 'unread' %}bg-light fw-bold{% endif %} text-wrap">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary style-badge" style="font-size: 0.7rem;">{{ n.notification_type }}</span>
+                                <small class="text-muted" style="font-size: 0.7rem;">{{ n.date.strftime('%d %b %H:%M') }}</small>
+                            </div>
+                            <div class="mt-1 text-dark" style="font-size: 0.85rem;">{{ n.title }}</div>
+                            <div class="text-muted small text-truncate" style="font-size: 0.75rem;">{{ n.message }}</div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-3 small">No recent notifications</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- User Profile & Role Badge -->
+            <div class="user-profile d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-1 rounded-pill">
+                <i class="fa-solid fa-user-doctor text-info fs-5"></i>
+                <div class="d-flex flex-column text-start" style="line-height: 1.2;">
+                    <span class="text-white fw-semibold small">{{ current_user.full_name }}</span>
+                    <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.65rem;">{{ current_user.role }}</span>
+                </div>
+                <div class="dropdown ms-1">
+                    <button class="btn btn-sm text-white dropdown-toggle p-0" type="button" data-bs-toggle="dropdown">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-user me-2 text-primary"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('download_postman_collection') }}"><i class="fa-solid fa-file-code me-2 text-success"></i>Postman API Collection</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fa-solid fa-power-off me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-nav">
+                <!-- Dashboard -->
+                <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-table-cells-large"></i> Dashboard
+                </a>
+
+                <!-- Patient Management -->
+                {% if current_user.role in ['Admin', 'Doctor', 'Nurse'] %}
+                <a href="{{ url_for('patient_list') }}" class="nav-item {% if request.endpoint in ['patient_list', 'add_patient'] %}active{% endif %}">
+                    <i class="fa-solid fa-users"></i> Patient Management
+                </a>
+                {% endif %}
+
+                <!-- Doctor Management -->
+                {% if current_user.role == 'Admin' %}
+                <a href="{{ url_for('doctor_management') }}" class="nav-item {% if request.endpoint == 'doctor_management' %}active{% endif %}">
+                    <i class="fa-solid fa-user-doctor"></i> Doctor Management
+                </a>
+                {% endif %}
+
+                <!-- Appointment Management -->
+                <a href="{{ url_for('appointments') }}" class="nav-item {% if request.endpoint in ['appointments', 'add_appointment'] %}active{% endif %}">
+                    <i class="fa-solid fa-calendar-check"></i> Appointment Management
+                </a>
+
+                <!-- Consultation Management -->
+                {% if current_user.role in ['Admin', 'Doctor', 'Nurse'] %}
+                <a href="{{ url_for('consultations') }}" class="nav-item {% if request.endpoint == 'consultations' %}active{% endif %}">
+                    <i class="fa-solid fa-stethoscope"></i> Consultation Management
+                </a>
+                {% endif %}
+
+                <!-- Laboratory Management -->
+                {% if current_user.role in ['Admin', 'Laboratory Staff', 'Doctor', 'Nurse'] %}
+                <a href="{{ url_for('lab_management') }}" class="nav-item {% if request.endpoint == 'lab_management' %}active{% endif %}">
+                    <i class="fa-solid fa-flask-vial"></i> Laboratory Management
+                </a>
+                {% endif %}
+
+                <!-- Prescription Management -->
+                <a href="{{ url_for('prescriptions') }}" class="nav-item {% if request.endpoint == 'prescriptions' %}active{% endif %}">
+                    <i class="fa-solid fa-file-prescription"></i> Prescription Management
+                </a>
+
+                <!-- Billing & Payments -->
+                <a href="{{ url_for('billing_management') }}" class="nav-item {% if request.endpoint == 'billing_management' %}active{% endif %}">
+                    <i class="fa-solid fa-credit-card"></i> Billing &amp; Payments
+                </a>
+
+                <!-- Notification System -->
+                <a href="{{ url_for('notifications_page') }}" class="nav-item {% if request.endpoint == 'notifications_page' %}active{% endif %}">
+                    <i class="fa-solid fa-bell"></i> Notification System
+                </a>
+
+                <!-- Reports & Analytics -->
+                {% if current_user.role in ['Admin', 'Doctor', 'Nurse'] %}
+                <a href="{{ url_for('reports') }}" class="nav-item {% if request.endpoint == 'reports' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-bar"></i> Reports &amp; Analytics
+                </a>
+                {% endif %}
+
+                <!-- System Integration (Admin) -->
+                {% if current_user.role == 'Admin' %}
+                <a href="{{ url_for('system_integration') }}" class="nav-item {% if request.endpoint == 'system_integration' %}active{% endif %}">
+                    <i class="fa-solid fa-network-wired"></i> System Integration
+                </a>
+                {% endif %}
+
+                <!-- Testing & Optimization (Admin) -->
+                {% if current_user.role == 'Admin' %}
+                <a href="{{ url_for('testing_optimization') }}" class="nav-item {% if request.endpoint == 'testing_optimization' %}active{% endif %}">
+                    <i class="fa-solid fa-gauge-high"></i> Testing &amp; Optimization
+                </a>
+                {% endif %}
+
+                <!-- EHR & Search (quick access) -->
+                <a href="{{ url_for('ehr_detail') }}" class="nav-item {% if request.endpoint == 'ehr_detail' %}active{% endif %}">
+                    <i class="fa-solid fa-clipboard-user"></i> EHR Records
+                </a>
+                <a href="{{ url_for('patient_search') }}" class="nav-item {% if request.endpoint == 'patient_search' %}active{% endif %}">
+                    <i class="fa-solid fa-magnifying-glass"></i> Patient Search
+                </a>
+
+
+                <!-- Patient Feedback -->
+                <a href="{{ url_for('feedback') }}" class="nav-item {% if request.endpoint == 'feedback' %}active{% endif %}">
+                    <i class="fa-solid fa-star"></i> Patient Feedback
+                </a>
+
+                <a href="{{ url_for('logout') }}" class="nav-item text-danger mt-3">
+                    <i class="fa-solid fa-right-from-bracket text-danger"></i> Logout
+                </a>
+            </div>
+
+            <!-- Live System Time Card Widget (Bottom Left) -->
+            <div class="system-time-card mt-3">
+                <div class="time-title">
+                    <i class="fa-regular fa-clock"></i> System Time
+                </div>
+                <div class="time-value" id="sidebarLiveClock">
+                    {{ system_time_str }}
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Body Content -->
+        <main class="app-content">
+            <div class="container-fluid px-0">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm mb-4" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    {% else %}
+        {% block login_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Live ticking system clock in sidebar
+        function updateLiveClock() {
+            const clockEl = document.getElementById('sidebarLiveClock');
+            if (!clockEl) return;
+            const now = new Date();
+            const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            clockEl.textContent = now.toLocaleDateString('en-GB', options);
+        }
+        setInterval(updateLiveClock, 1000);
+        updateLiveClock();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

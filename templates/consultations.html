@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Custom Breadcrumb -->
+<div class="custom-breadcrumb mb-2">
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> &gt; <a href="{{ url_for('consultations') }}">Consultations</a> &gt; <span>Add Consultation</span>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold text-dark mb-0">
+        <i class="fa-solid fa-notes-medical me-2 text-primary"></i>Consultation Management
+    </h3>
+</div>
+
+<!-- PART 1: Patient Consultation Form (Matching Image 2 Top Half) -->
+<div class="card-custom shadow-sm mb-4" id="consultationFormCard">
+    <h5 class="fw-bold text-primary mb-4">Patient Consultation Form</h5>
+    
+    <form id="consultationForm" onsubmit="handleRealtimeConsultationSave(event)">
+        <div class="row g-3 mb-3">
+            <!-- Patient Name -->
+            <div class="col-md-6">
+                <label class="form-label">Patient Name <span class="required-star">*</span></label>
+                <select id="consultPatientSelect" class="form-select fw-semibold" required>
+                    {% for p in patients %}
+                    <option value="{{ p.id }}" data-name="{{ p.full_name }}" {% if loop.first %}selected{% endif %}>
+                        {{ p.full_name }} ({{ p.patient_code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Date of Consultation -->
+            <div class="col-md-6">
+                <label class="form-label">Date of Consultation <span class="required-star">*</span></label>
+                <input type="date" id="consultDateInput" class="form-control" value="2026-07-23" required>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <!-- Doctor Name -->
+            <div class="col-md-6">
+                <label class="form-label">Doctor Name <span class="required-star">*</span></label>
+                <select id="consultDoctorSelect" class="form-select fw-semibold" required>
+                    <option value="Dr. Priya" selected>Dr. Priya</option>
+                    <option value="Dr. John Smith">Dr. John Smith</option>
+                    <option value="Dr. Rajesh">Dr. Rajesh</option>
+                </select>
+            </div>
+
+            <!-- Diagnosis -->
+            <div class="col-md-6">
+                <label class="form-label">Diagnosis <span class="required-star">*</span></label>
+                <input type="text" id="consultDiagnosisInput" class="form-control" value="Viral Fever" placeholder="e.g. Viral Fever" required>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <!-- Symptoms -->
+            <div class="col-md-6">
+                <label class="form-label">Symptoms <span class="required-star">*</span></label>
+                <textarea id="consultSymptomsInput" class="form-control" rows="3" required>Fever, Cough, Headache and Body Pain</textarea>
+            </div>
+
+            <!-- Treatment / Prescription -->
+            <div class="col-md-6">
+                <label class="form-label">Treatment / Prescription <span class="required-star">*</span></label>
+                <textarea id="consultTreatmentInput" class="form-control" rows="3" required>Paracetamol 500 mg – Twice a day
+Drink plenty of water and take rest.</textarea>
+            </div>
+        </div>
+
+        <!-- Buttons Row -->
+        <div class="d-flex align-items-center gap-3">
+            <button type="submit" id="saveConsultBtn" class="btn btn-success-green px-4 py-2">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Save Consultation
+            </button>
+            <button type="button" class="btn btn-outline-secondary px-4 py-2" onclick="resetConsultationForm()">
+                <i class="fa-solid fa-rotate-left me-2"></i>Reset
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- PART 2: Real-Time Consultation Saved Summary Display (Matching Image 2 Bottom Half) -->
+<div id="consultationSavedContainer" class="d-none">
+    
+    <!-- Success Banner -->
+    <div class="success-banner-custom shadow-sm mb-4">
+        <i class="fa-solid fa-circle-check fs-4"></i>
+        <span>Consultation Details Saved Successfully!</span>
+    </div>
+
+    <!-- Summary Box -->
+    <div class="consultation-summary-card shadow-sm mb-4">
+        <h5 class="fw-bold text-primary mb-4">Consultation Summary</h5>
+        
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="label">Patient Name</div>
+                <div class="value">: <span id="summaryPatientName">Rahul Kumar</span></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Symptoms</div>
+                <div class="value">: <span id="summarySymptoms">Fever, Cough, Headache and Body Pain</span></div>
+            </div>
+
+            <div class="summary-item">
+                <div class="label">Doctor Name</div>
+                <div class="value">: <span id="summaryDoctorName">Dr. Priya</span></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Diagnosis</div>
+                <div class="value">: <span id="summaryDiagnosis">Viral Fever</span></div>
+            </div>
+
+            <div class="summary-item">
+                <div class="label">Date of Consultation</div>
+                <div class="value">: <span id="summaryDate">20-05-2024</span></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Treatment / Prescription</div>
+                <div class="value">: <span id="summaryTreatment">Paracetamol 500 mg – Twice a day<br>Drink plenty of water and take rest.</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex align-items-center justify-content-center gap-3">
+        <button type="button" class="btn btn-primary-blue px-4 py-2" onclick="showConsultationForm()">
+            <i class="fa-solid fa-plus me-2"></i>Add Another Consultation
+        </button>
+        <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-toggle="collapse" data-bs-target="#allConsultationsCollapse">
+            <i class="fa-solid fa-list me-2"></i>View All Consultations
+        </button>
+    </div>
+</div>
+
+<!-- Collapsible List of All Consultations -->
+<div class="collapse mt-4" id="allConsultationsCollapse">
+    <div class="card-custom p-4">
+        <h5 class="fw-bold text-primary mb-3">All Saved Consultations</h5>
+        <div class="table-responsive">
+            <table class="table table-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Patient Name</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Symptoms</th>
+                        <th>Treatment</th>
+                    </tr>
+                </thead>
+                <tbody id="allConsultationsTbody">
+                    {% for c in consultations %}
+                    <tr>
+                        <td>{{ c.consultation_date }}</td>
+                        <td class="fw-bold">{{ c.patient.full_name }}</td>
+                        <td>{{ c.doctor_name }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ c.diagnosis }}</span></td>
+                        <td class="fs-7">{{ c.symptoms }}</td>
+                        <td class="fs-7">{{ c.treatment_prescription }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function handleRealtimeConsultationSave(event) {
+        event.preventDefault();
+        
+        const saveBtn = document.getElementById('saveConsultBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Saving...';
+
+        const patientSelect = document.getElementById('consultPatientSelect');
+        const patientId = patientSelect.value;
+        const patientName = patientSelect.options[patientSelect.selectedIndex].getAttribute('data-name');
+        const consultDate = document.getElementById('consultDateInput').value;
+        const doctorName = document.getElementById('consultDoctorSelect').value;
+        const diagnosis = document.getElementById('consultDiagnosisInput').value;
+        const symptoms = document.getElementById('consultSymptomsInput').value;
+        const treatment = document.getElementById('consultTreatmentInput').value;
+
+        // AJAX POST Request for real-time save
+        fetch('/api/consultations/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                patient_id: patientId,
+                patient_name: patientName,
+                doctor_name: doctorName,
+                consultation_date: consultDate,
+                diagnosis: diagnosis,
+                symptoms: symptoms,
+                treatment_prescription: treatment
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save Consultation';
+
+            if (data.success) {
+                const c = data.consultation;
+                
+                // Update Summary View elements
+                document.getElementById('summaryPatientName').textContent = c.patient_name;
+                document.getElementById('summaryDoctorName').textContent = c.doctor_name;
+                document.getElementById('summaryDate').textContent = c.consultation_date;
+                document.getElementById('summaryDiagnosis').textContent = c.diagnosis;
+                document.getElementById('summarySymptoms').textContent = c.symptoms;
+                document.getElementById('summaryTreatment').innerHTML = c.treatment_prescription.replace(/\n/g, '<br>');
+
+                // Add to table dynamically
+                const tbody = document.getElementById('allConsultationsTbody');
+                if (tbody) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${c.consultation_date}</td>
+                        <td class="fw-bold">${c.patient_name}</td>
+                        <td>${c.doctor_name}</td>
+                        <td><span class="badge bg-light text-dark border">${c.diagnosis}</span></td>
+                        <td class="fs-7">${c.symptoms}</td>
+                        <td class="fs-7">${c.treatment_prescription}</td>
+                    `;
+                    tbody.prepend(tr);
+                }
+
+                // Smooth real-time transition matching Image 2
+                document.getElementById('consultationFormCard').classList.add('d-none');
+                document.getElementById('consultationSavedContainer').classList.remove('d-none');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert('Error: ' + (data.error || 'Failed to save consultation.'));
+            }
+        })
+        .catch(err => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Save Consultation';
+            alert('Server error occurred.');
+        });
+    }
+
+    function resetConsultationForm() {
+        document.getElementById('consultationForm').reset();
+    }
+
+    function showConsultationForm() {
+        document.getElementById('consultationFormCard').classList.remove('d-none');
+        document.getElementById('consultationSavedContainer').classList.add('d-none');
+        resetConsultationForm();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

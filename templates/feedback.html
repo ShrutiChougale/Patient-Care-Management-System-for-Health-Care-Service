@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient text-white p-4 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border-radius: 12px;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-1"><i class="fa-solid fa-star-half-stroke me-2"></i>Patient Feedback & Satisfaction</h2>
+                        <p class="mb-0 text-white-50">Rate your experience with doctors and hospital services to help us continuously improve care quality.</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="display-6 fw-bold text-warning"><i class="fa-solid fa-star fs-3"></i> {{ avg_rating }} / 5.0</div>
+                        <small class="text-white-50">Average Patient Satisfaction Score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Feedback Form (Patient submission) -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Submit Care Feedback</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('feedback') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select Doctor / Department</label>
+                            {{ form.doctor_id(class="form-select") }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rating (1 - 5 Stars)</label>
+                            {{ form.rating(class="form-select") }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Feedback / Treatment Experience</label>
+                            {{ form.comments(class="form-control", rows="4", placeholder="Share your experience regarding consultation, treatment clarity, wait times...") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            <i class="fa-paper-plane fa-solid me-2"></i>Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Log / Dashboard Stats -->
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-comments me-2 text-info"></i>Recent Patient Reviews</h5>
+                    <span class="badge bg-primary rounded-pill px-3">{{ feedbacks|length }} Reviews</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if feedbacks %}
+                            {% for fb in feedbacks %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark">{{ fb.patient.full_name if fb.patient else 'Patient' }}</h6>
+                                        <small class="text-muted"><i class="fa-user-md fa-solid me-1"></i>Doctor: {{ fb.doctor.doctor_name if fb.doctor else 'General Hospital' }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-warning">
+                                            {% for i in range(fb.rating) %}
+                                            <i class="fa-solid fa-star"></i>
+                                            {% endfor %}
+                                            {% for i in range(5 - fb.rating) %}
+                                            <i class="fa-regular fa-star text-muted"></i>
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ fb.created_at.strftime('%d-%b-%Y') }}</small>
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-secondary small bg-light p-2 rounded mt-2">
+                                    "{{ fb.comments }}"
+                                </p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-regular fa-comment-dots fs-1 mb-2"></i>
+                                <p class="mb-0">No feedback submitted yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
